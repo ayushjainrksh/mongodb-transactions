@@ -3,6 +3,8 @@ const express = require('express'),
     PORT = process.env.PORT || 3000,
     bodyParser = require('body-parser'),
     mongoose = require('mongoose'),
+    fileUpload = require('express-fileupload'),
+    csv = require('@fast-csv/parse'),
     {Worker, isMainThread} = require('worker_threads');
 
 require('dotenv').config();
@@ -10,6 +12,8 @@ require('dotenv').config();
 const Employee = require('./models/Employee');
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(fileUpload());
 
 let database;
 let collection;
@@ -33,7 +37,7 @@ mongoose.connect(process.env.uri, {useNewUrlParser: true, useUnifiedTopology: tr
     app.listen(PORT, function(err){
         if(err)
             console.log(err);
-        console.log(`Server starte at ${PORT}...`)
+        console.log(`Server starte at ${PORT}...`);
     }) 
 });
 
@@ -72,11 +76,27 @@ app.post('/employee/create', async function(req, res){
     try {
         if(isMainThread) {
             console.log('Creating a new worker');
-            workers = new Worker('./workers.js', {
-                workerData: {
-                    reqBody: req.body
-                }
-            });
+            
+            if (!req.files)
+                return res.status(400).send('No files were uploaded.');
+            var employeeFile = req.files.file;
+            var employees = [];
+            csv
+            .parseString(employeeFile.data.toString(), {
+                headers: true,
+                ignoreEmpty: true
+            })
+            .on("data", function(data){
+                employees.push(data);
+            })
+            .on("end", function(){
+                console.log(employees);
+                workers = new Worker('./workers.js', {
+                    workerData: {
+                        reqBody: employees
+                    }
+                });
+            })
         } else {
             console.log("I am a worker");
         }

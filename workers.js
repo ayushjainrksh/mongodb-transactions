@@ -28,7 +28,8 @@ async function createEmployee(requestData) {
     try {
         session = await mongoose.startSession();
         session.startTransaction();
-        await Employee.collection.insert([requestData], {session: session});
+        await Employee.collection.insert(requestData, {session: session});
+        console.log("Waiting...");
         setTimeout(async()=>{
             await session.commitTransaction();
             session.endSession();
@@ -42,7 +43,7 @@ async function createEmployee(requestData) {
     }
 }
 
-const requestData = worker.workerData;
+const requestData = worker.workerData.reqBody;
 
 console.log(requestData);
 
