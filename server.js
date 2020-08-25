@@ -2,22 +2,17 @@ const express = require('express'),
     app = express(),
     PORT = process.env.PORT || 3000,
     bodyParser = require('body-parser'),
-    mongoose = require('mongoose');
+    mongoose = require('mongoose'),
+    {Worker, isMainThread} = require('worker_threads');
 
 require('dotenv').config();
 
-const employeeSchema = new mongoose.Schema({
-    name: String,
-    dob: String,
-    isManager: Boolean,
-    department: String
-});
+const Employee = require('./models/Employee');
 
-const Employee = mongoose.model('Employee', employeeSchema);
+app.use(bodyParser.json());
 
 let database;
 let collection;
-app.use(bodyParser.json());
 mongoose.connect(process.env.uri, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, db){
     database = db;
     db.db.listCollections().toArray(function(err, collectionNames){
@@ -56,7 +51,7 @@ app.get('/employee', async function(req, res){
     }
 });
 
-app.post('/employee/create', async function(req, res){
+app.post('/employee/createOne', async function(req, res){
     try {
         const session = await mongoose.startSession();
         session.startTransaction();
@@ -70,3 +65,27 @@ app.post('/employee/create', async function(req, res){
         res.send({"err": err})
     }
 });
+
+app.post('/employee/create', async function(req, res){
+    let workers;
+    try {
+        if(isMainThread) {
+            console.log('Creating a new worker');
+            workers = new Worker('./workers.js', {
+                workerData: {
+                    reqBody: req.body
+                }
+            });
+        } else {
+            console.log("I am a worker");
+        }
+        res.sendStatus(200);
+    } catch(err) {
+        console.log(err)
+        res.send({"err": err})
+    }
+});
+
+app.get('/cancelTesting', function(req, res){
+    res.send("Cancel");
+})
