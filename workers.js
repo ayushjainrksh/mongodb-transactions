@@ -22,16 +22,18 @@ mongoose.connect(process.env.uri, {useNewUrlParser: true, useUnifiedTopology: tr
     });
 });
 
+let session;
 
 async function createEmployee(requestData) {
-    let session;
     try {
         session = await mongoose.startSession();
         session.startTransaction();
         await Employee.collection.insert([requestData], {session: session});
-        await session.commitTransaction();
-        session.endSession();
-        console.log("Successful")
+        setTimeout(async()=>{
+            await session.commitTransaction();
+            session.endSession();
+            console.log("Successful")
+        }, 5000);
     } catch(err) {
         console.log(err);
         await session?.abortTransaction();
@@ -47,3 +49,13 @@ console.log(requestData);
 createEmployee(requestData);
 console.log(`Thread id: ${worker.threadId}`);
 
+worker.parentPort.on('message', async function(message) {
+    console.log(message);
+    if(message=='cancel'){
+        console.log('Cancelling in worker thread.');
+        session.endSession();
+        console.log('End session');
+        console.log('Kill thread: ', worker.threadId);
+        process.exit(0);
+    }
+});

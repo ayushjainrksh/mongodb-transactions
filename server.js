@@ -13,6 +13,8 @@ app.use(bodyParser.json());
 
 let database;
 let collection;
+let workers;
+
 mongoose.connect(process.env.uri, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, db){
     database = db;
     db.db.listCollections().toArray(function(err, collectionNames){
@@ -67,7 +69,6 @@ app.post('/employee/createOne', async function(req, res){
 });
 
 app.post('/employee/create', async function(req, res){
-    let workers;
     try {
         if(isMainThread) {
             console.log('Creating a new worker');
@@ -86,6 +87,7 @@ app.post('/employee/create', async function(req, res){
     }
 });
 
-app.get('/cancelTesting', function(req, res){
-    res.send("Cancel");
+app.post('/employee/create/cancel', function(req, res){
+    workers.postMessage('cancel');
+    res.send("Stopped successfully");
 })
