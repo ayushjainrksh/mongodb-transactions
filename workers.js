@@ -40,16 +40,19 @@ async function createEmployee(requestData) {
         //Wait for 5 seconds before committing to the database (emulate a long running transaction)
         console.log("Waiting...");
         setTimeout(async()=>{
+            console.log("Waiting time over. Committing transaction...");    
             //Commit the transaction if there is no error
             await session.commitTransaction();
-            session.endSession();
             console.log("Employee data added successfully!");
+            await session.endSession();
+            await process.exit(0);
         }, 5000);
     } catch(err) {
         //Abort and rollback the transaction in case of an error
-        await session?.abortTransaction();
-        session?.endSession();
         console.log("Failed to add employee data!");
+        await session?.abortTransaction();
+        await session.endSession();
+        await process.exit(0);
     }
 }
 
@@ -66,9 +69,14 @@ worker.parentPort.on('message', async function(message) {
     //If cancel message arrives, then stop the transaction
     if(message=='cancel'){
         console.log('Cancelling transaction...');
-        session.endSession();
-        console.log('======Session ended======');
-        console.log('Killing thread with id: ', worker.threadId);
-        process.exit(0);
+        try {
+            await session?.abortTransaction();
+            console.log('Transaction cancelled successfully!');
+            await session.endSession();
+            await process.exit(0);
+        } catch(err) {
+            session?.endSession();
+            throw err;
+        }
     }
 });
