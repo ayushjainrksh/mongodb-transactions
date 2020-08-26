@@ -58,7 +58,6 @@ async function createEmployee(requestData) {
 
 //Get data from the main thread
 const requestData = worker.workerData.reqBody;
-console.log(requestData);
 
 //Call function to start the transaction
 createEmployee(requestData);
@@ -67,7 +66,7 @@ console.log(`Thread id: ${worker.threadId}`);
 //Listen for message on parentPort
 worker.parentPort.on('message', async function(message) {
     //If cancel message arrives, then stop the transaction
-    if(message=='cancel'){
+    if(message==='cancel'){
         console.log('Cancelling transaction...');
         try {
             await session?.abortTransaction();
