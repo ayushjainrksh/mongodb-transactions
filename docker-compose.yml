@@ -1,0 +1,12 @@
+version: '3'
+services: 
+    web:
+        build: .
+        command: npm run dev
+        volumes: 
+            - .:/usr/src/app
+            - /usr/src/app/node_modules
+        ports:
+            - "3000:3000"
+        environment: 
+            uri: mongodb+srv://ayush:atlan@cluster0.zxk0k.mongodb.net/atlan?retryWrites=true&w=majority

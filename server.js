@@ -43,7 +43,7 @@ mongoose.connect(process.env.uri, {useNewUrlParser: true, useUnifiedTopology: tr
     app.listen(PORT, function(err){
         if(err) 
             console.log(err);
-        console.log(`Server starte at ${PORT}...`);
+        console.log(`Server started at ${PORT}...`);
     }) 
 });
 
