@@ -35,7 +35,7 @@ async function createEmployee(requestData) {
         session.startTransaction();
         
         //Insert data to the collection
-        await Employee.collection.insert(requestData, {session: session});
+        await Employee.collection.insertMany(requestData, {session: session});
 
         //Wait for 5 seconds before committing to the database (emulate a long running transaction)
         console.log("Waiting...");

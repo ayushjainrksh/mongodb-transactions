@@ -63,10 +63,10 @@ app.get('/ping', function(req, res){
 app.get('/employee', async function(req, res){
     try{
         const employees = await Employee.find();
-        if(employees)
+        if(employees.length)
             res.send({'employees': employees, 'message': `Fetched ${employees.length} employees successfully`});
         else
-            res.send({'employees': null, 'message': 'No employee exists'})
+            res.send({'employees': [], 'message': 'No employee exists'})
     } catch(err) {
         res.send({'error': err, 'message': 'Encountered an error. Please try again.'});
     }
