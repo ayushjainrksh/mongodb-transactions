@@ -37,7 +37,11 @@ To interrupt a huge operation safely(such as a large file upload) in mongodb, th
 - `GET '/employee'`: To display all employee data
 - `POST '/employee/createOne'`: To create a single entry in the application
 - `POST '/employee/create'`: To create multiple employees by uploading a csv file of employee data
+  
+  ![upload csv](https://i.ibb.co/30Fc1ZP/emp-Create.png)
 - `POST '/employee/create/cancel'`: To stop the ongoing upload
+  
+  ![upload cancel](https://i.ibb.co/JvkVXff/emp-Cancel.png)
 
 ## Tech stack
 - MongoDB version: 4.4.0
